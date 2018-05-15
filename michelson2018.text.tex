@@ -39,7 +39,7 @@ and Bayesian Classification}
 \author[2]{Thomas Sullivan}
 
 % Affiliations go here
-\affil[1]{Electro-Harmonix / New Sensor Corporation}
+\affil[1]{New Sensor Corporation / Electro-Harmonix}
 \affil[2]{Carnegie Mellon University}
 
 % Correspondece should include the corresponding author's name and e-mail address
@@ -59,20 +59,20 @@ and Bayesian Classification}
 
 \begin{document}
 
+\setlength{\parindent}{1em}
 
 \twocolumn[
 \maketitle % MANDATORY! 
 
 \begin{onecolabstract}
-We propose two new methods to classify guitar strings using only audio with the goal of developing automated tablature transcription. The first method regresses the log-inharmonicities of guitar strings against their pitches to obtain characteristic linear trajectories, and assigns unseen notes to the strings of the regressions whose means and variances maximize the probability of the measured inharmonicities of the notes. The second method, developed as a baseline against which to measure the first, characterizes the inharmonicity distribution of each fretboard position as a normal probability density, then similarly assigns unseen notes to the fretboard positions that maximize the likelihood of their observed inharmonicities. Results from the standard Real World Corpus of guitar recordings show that exploiting log-inharmonicity regressions generally increases performance compared to our Bayesian method, but does not generally increase performance on classical and acoustic guitars compared to an existing inharmonicity-based system in \citet{barbanchoi2012}. Also in this work, we derive an inharmonicity compensation feature to allow for transcription of arbitrarily-tuned guitars, provided the tuning is known. Results from personally-recorded acoustic and electric guitars in various alternate tunings show that our tuning compensation is successful at predicting tuning-related inharmonicity changes.
+We propose two new methods to classify guitar strings using only audio with the goal of developing automated tablature transcription. The first method regresses the log-inharmonicities of guitar strings against their pitches to obtain characteristic linear trajectories, and assigns unseen notes to the strings of the regressions whose means and variances maximize the probability of the measured inharmonicities of the notes. The second method, developed as a baseline against which to measure the first, characterizes the inharmonicity distribution of each fretboard position as a normal probability density, then similarly assigns unseen notes to the fretboard positions that maximize the likelihood of their observed inharmonicities. Results from the standard Real World Corpus of guitar recordings show that exploiting log-inharmonicity regressions generally increases performance compared to our Bayesian method, but does not generally increase performance on classical and acoustic guitars compared to an existing inharmonicity-based system in \citet{barbanchoi2012}.
 \end{onecolabstract}
 ]
 
 \section{Introduction}
-
 The guitar is a popular musical instrument whose family comprises a diverse collection of stringed instruments. Despite their variation, the majority of guitar configurations exhibit six strings tuned to $E2$ ($82$ Hz), $A2$ ($110$ Hz), $D3$ ($147$ Hz), $G3$ ($196$ Hz), $B3$ ($247$ Hz), and $E4$ ($330$ Hz). Most guitars also typically have upwards of 20 frets, allowing for versatile musical passage realizations along the fretboard. A consequence of the tuning and extensive fretting locations is liberal pitch overlap between neighboring strings; multiple fretboard locations can usually be selected to produce a given pitch. This ambiguity renders conventional music scores, which represent passages as notes and chords, undesirable for students trying to learn more skillful placement of scales and arpeggios, or for enthusiasts trying to uncover the fretboard positions used on riffs recorded by virtuosic players. Figure~\ref{fig:score-tabs} illustrates this ambiguity.
 
-Tablature is a desirable, alternative music notation that does not suffer from the one-to-many mapping of scores. The staff, instead of representing pitch as in classical notation, depicts a birds-eye view of the guitar neck from the perspective of the performer. Each of the six horizontal lines signify a corresponding string on the guitar, and numbers on each line specify the fret to be fingered. Reasons for tablature desirability are numerous \citep{macrae2010}, such as accessibility (legibility does not require formal musical training) and transportability (tablature can be easily represented with ASCII characters). 
+Tablature is a desirable alternative music notation that does not suffer from the one-to-many mapping of scores. The staff, instead of representing pitch as in classical notation, depicts a birds-eye view of the guitar neck from the perspective of the performer. Each of the six horizontal lines signify a corresponding string on the guitar, and numbers on each line specify the fret to be fingered. Reasons for tablature desirability are numerous \citep{macrae2010}, such as accessibility (legibility does not require formal musical training) and transportability (tablature can be easily represented with ASCII characters). 
 
 Accurate tablature transcription is a laborious task, however. Dependable tablature containing few errors typically require the careful listening of a seasoned musician to an audio recording, and possibly video recordings for additional consultation. Reliable automation of this transcription task would benefit the guitar student community by expediting quality tablature generation and unearthing fretboard positions of guitar riffs in songs for which accurate tablature does not yet exist.
 \begin{figure}[!htbp] 
@@ -100,7 +100,7 @@ In other words, the inharmonicity $\beta$ of a vibrating string is a dimensionle
 \label{fig:skew}
 \end{figure}
 
-Moreover, inharmonicity in the guitar varies in a deterministic manner with respect to fret positions along a given string \citep{barbanchoi2012}. Specifically, the inharmonicity $\beta(s,n)$ of a note produced by string $s$ at fret number $n$ can be expressed in terms of the inharmonicity of the open-string note $\beta(s,0)$ according to:
+Moreover, inharmonicity in the guitar varies in a deterministic manner with respect to fret positions along a given string. Specifically, the inharmonicity $\beta(s,n)$ of a note produced by string $s$ at fret number $n$ can be expressed in terms of the inharmonicity of the open-string note $\beta(s,0)$ according to:
 \begin{equation} 
 \label{eq:beta-traj}
 \beta(s,n) = \beta(s,0)2^{\frac{n}{6}}
@@ -110,7 +110,7 @@ Figure~\ref{fig:beta-trajectories-ag} illustrates these theoretical trajectories
 \begin{figure}[h] 
 \centering
 \includegraphics[scale=0.25]{figs/beta-trajectories-ag}
-\caption{Example inharmonicity trajectories of acoustic guitar strings, calculated from measured open-string inharmonicities. Only Fret 0 (open-string) through Fret 3 are shown. Observe the restriction to the exponential trajectory defined by equation~\eqref{eq:beta-traj}.}
+\caption{Example inharmonicity trajectories of acoustic guitar strings, calculated from measured open-string inharmonicities. Only Fret 0 (open-string) through Fret 3 are shown.}
 \label{fig:beta-trajectories-ag}
 \end{figure}
 
@@ -118,9 +118,9 @@ Exploiting the \textit{empirical} trajectories of guitar strings, however, has n
 
 \section{Previous Work}
 
-Empirical estimation of inharmonicity has been under investigation for nearly 40 years. Using pitch extraction techniques to perform estimation was first attempted by Galembo in 1979 and 1986 \citep{galembo1979,galembo1987}. Several additional methods have been proposed since then. In 1994, Galembo \citep{galembo1994} hypothesized a connection between partials-based fundamental pitch estimates and the degree of inharmonicity in a spectrum. They specifically investigated cepstral analysis and a variant of the harmonic product spectrum method applied to both synthetic tones and recorded piano notes. The same authors in \citep{galembo1999} introduced another method in 1999, dubbed the inharmonic comb filter (ICF) method. The ICF whose inharmonicity best matched that of the note would produce the output with lowest spectral energy, since its notches would most align with, and therefore best cancel, the inharmonic note partials. Rauhala \citep{rauhala2007} introduced an efficient procedure in 2007, known as partial frequency deviations (PDF), that iteratively catalogued estimates of the deviations of partial frequencies of a note and returned increasingly better estimates of the inharmonicity. In 2009, Hodgkinson \citep{hodgkinson2009} proposed a yet more efficient and accurate algorithm, named median-adjustive trajectories (MAT). Three years later, Barbancho \citep{barbanchoi2012} introduced another PFD-based approach, which we refer to as the partial coincidence tally (PCT) method, as part of a guitar tablature transcription system. Also in 2012, Abesser \citep{abesser2012} used parametric spectral modeling, again in the context of a guitar tablature transcription system.
+Empirical estimation of inharmonicity has been investigated for nearly 40 years. Using pitch extraction techniques to perform estimation was first attempted by Galembo in 1979 and 1986 \citep{galembo1979,galembo1987}. In 1994, Galembo \citep{galembo1994} hypothesized a connection between partials-based fundamental pitch estimates and the degree of inharmonicity in a spectrum. The same authors in \citep{galembo1999} introduced another method in 1999 based on inharmonic comb filters. Rauhala \citep{rauhala2007} introduced an efficient iterative procedure in 2007, known as partial frequency deviations (PFD). In 2009, Hodgkinson \citep{hodgkinson2009} proposed a yet more efficient and accurate algorithm, named median-adjustive trajectories (MAT). Three years later, Barbancho \citep{barbanchoi2012} introduced another PFD-based approach, which we refer to as the partial coincidence tally (PCT) method, as part of a guitar tablature transcription system. Also in 2012, Abesser \citep{abesser2012} used parametric spectral modeling, again in the context of a guitar tablature transcription system.
 
-Tablature transcription is also a rich research topic. A popular framework for the stringed-instrument transcription problem is that of weighted directed graphs that capture all plausible sequences of fretboard positions in a given musical passage \citep{sayegh1989,radicioni2005,yazawa2013,burlet2013,burlet2015,radisav2004}. A number of teams have had success with machine learning techniques such as neural networks, genetic algorithms, hidden Markov models, and SVMs  \citep{gagnon2003,tuohy2006,barbancho2009,barbanchoa2012,abesser2012,kehling2014,dittmar2013,abesser2012}. Some researchers have explored usage of media other than audio or musical information (i.e., scores), such as augmented guitar hardware and video recordings \citep{ogrady2009,paleari2008,kerd2007}.
+Inharmonicity-based tablature transcription has also received ample study. A number of teams have had success with machine learning techniques such as neural networks, genetic algorithms, hidden Markov models, and SVMs  \citep{gagnon2003,tuohy2006,barbancho2009,barbanchoa2012,abesser2012,kehling2014,dittmar2013,abesser2012}.
 
 \section{Methods}
 
@@ -136,7 +136,7 @@ where $m_{os}$ is the open-string pitch of string $s$. Figure~\ref{fig:beta-v-mi
 \begin{figure}[h] 
 \centering
 \includegraphics[scale=0.25]{beta-v-midi}
-\caption{Inharmonicity estimates for Frets 0-12 on Strings 1-6 of RWC Acoustic Guitar AG111. Note the exponential trajectory as in Fig.~\ref{fig:beta-trajectories-ag} and the increased segregation since notes and their inharmonicities are now plotted against their fundamental instead of their fret number.}
+\caption{Inharmonicity estimates for Frets 0-12 on Strings 1-6 of RWC Acoustic Guitar AG111, plotted against MIDI fundamental instead of fret number.}
 \label{fig:beta-v-midi}
 \end{figure}
 Now if we consider the log-inharmonicity $\beta_{l}(m)$, we see that
@@ -176,88 +176,33 @@ which yields the weight vector $\mathbf{w}_s$ that minimizes the sum of squared 
 %\label{fig:traj-v-reg}
 %\end{figure}
 
-Occasional estimates from the inharmonicity measurement routine are outliers that deviate substantially from the linear trajectory model, so instead of the standard unweighted regression in~\eqref{lin-reg} we rather perform a bisquare weighted linear regression to approximate the log-inharmonicities. Bisquare weighting is a robust linear regression procedure that minimizes a \textit{weighted} sum of squares which de-emphasizes outliers \citep{matlab-robustfit}. This provides us with higher-quality regressions that were more robust to stray inharmonicity measurements.
+Occasional estimates from the inharmonicity measurement routine were outliers that deviated substantially from the linear trajectory model, so instead of the standard unweighted regression in~\eqref{lin-reg} we performed a bisquare weighted linear regression to approximate the log-inharmonicities. Bisquare weighting is a robust linear regression procedure that minimizes a \textit{weighted} sum of squares which de-emphasizes outliers \citep{matlab-robustfit}. This provided us with higher-quality regressions that were more robust to stray inharmonicity measurements.
 
-To classify unknown notes, we impose Gaussian probability distributions over the inharmonicity measurements of each string centered at their trajectories, and evaluate them at the inharmonicities of unseen notes to determine the most likely string from which it came. The means of the Gaussians are the log-inharmonicity values of points on the line, and the variances of the Gaussians are those of the residuals of the regressions, $\sigma_s^2$. In this manner, the probability distribution that characterizes the inharmonicity trajectory $\mathbf{w}_s$ of string $s$ at the fundamental pitch $m_0^{(i)}$ of the $i$th note $\mathbf{x}^{(i)} = [1,m_0^{(i)}]^T$ is defined as the normal distribution $\mathcal{N}(\mu, \sigma^2)$, with mean $\mu = \mathbf{w}_s^T\mathbf{x}^{(i)}$ and variance $\sigma^2 = \sigma_s^2$. Now to classify the $n$th unseen note $\mathbf{x}^{(n)}$, we simply measure its log-inharmonicity $\beta^{(n)}$ and obtain the probability that this log-inharmonicity was observed given each string $s$ according to
+To classify unknown notes, we imposed Gaussian probability distributions over the inharmonicity measurements of each string centered at their trajectories, and evaluated them at the inharmonicities of unseen notes to determine the most likely string from which it came. The means of the Gaussians are the log-inharmonicity values of points on the line, and the variances of the Gaussians are those of the residuals of the regressions, $\sigma_s^2$. In this manner, the probability distribution that characterized the inharmonicity trajectory $\mathbf{w}_s$ of string $s$ at the fundamental pitch $m_0^{(i)}$ of the $i$th note $\mathbf{x}^{(i)} = [1,m_0^{(i)}]^T$ was defined as the normal distribution $\mathcal{N}(\mu, \sigma^2)$, with mean $\mu = \mathbf{w}_s^T\mathbf{x}^{(i)}$ and variance $\sigma^2 = \sigma_s^2$. Now to classify the $n$th unseen note $\mathbf{x}^{(n)}$, we measured its log-inharmonicity $\beta^{(n)}$ and obtained the probability that this log-inharmonicity was observed given each string $s$ according to
 \begin{equation}
 P(\mathbf{x}^{(n)},\beta^{(n)} | s) = \mathcal{N}(\beta^{(n)} | \mathbf{w}_s^T\mathbf{x}^{(n)},\sigma_s^2),
 \end{equation}
-and return the predicted string $\hat{s}^{(n)}$ that maximizes this probability,
+and returned the predicted string $\hat{s}^{(n)}$ that maximized this probability,
 \begin{equation}
 \hat{s}^{(n)} = \argmax_{s}P(\mathbf{x}^{(n)},\beta^{(n)} | s).
 \label{eq:string-argmax}
 \end{equation}
 We also attempted classification using a decision function that selected the trajectory which minimized the residual instead of maximizing the probability, but we found that the probabilistic method performed better.
 
-Then, we transform the string classifier output into tablature notation. This is a trivial task provided we know the tuning $\mathbf{t} = [m_1, m_2, m_3, m_4, m_5, m_6]^T$ of the unknown guitar, where $m_s$ is the MIDI pitch number of the open note on string $s$. We already have an estimate of the MIDI pitch $m^{(n)}$ of the $n$th unknown note, so simply taking the difference between $m^{(n)}$ and the open pitch $m_s$ of its assigned string yields the fret on which the note was played; each fret on a guitar increases the pitch of the string by one half-step, or equivalently the MIDI pitch number by one integer.
+Then, we transformed the string classifier output into tablature notation. This is a trivial task because we know the tuning $\mathbf{t} = [m_1, m_2, m_3, m_4, m_5, m_6]^T$ of the unknown guitar, where $m_s$ is the MIDI pitch number of the open note on string $s$. Since we had an estimate of the MIDI pitch $m^{(n)}$ of the $n$th unknown note, so taking the difference between $m^{(n)}$ and the open pitch $m_s$ of its assigned string yielded the fret on which the note was played; each fret on a guitar increases the pitch of the string by one half-step, or equivalently the MIDI pitch number by one integer.
 
-Lastly, we refine the fretboard estimates with plausibility filtering \citep{abesser2012}, in which we reject and reassign string decisions that are implausible given the constraints and assumptions of the data. If our systems assigns to a note a string on which the corresponding fretted position is negative, a mistake has been made since frets cannot possibly be lower than 0 (the open-string). Similarly, if our system assigns to a note a string on which the corresponding fret is greater than 12, a mistake has also been made because our guitar recordings feature only frets 0-12. When either of these situations arise, we reject the string classification decision and select the next most probable string. If the succeeding string is also implausible, the process is iterated until all six strings have been considered.
+Lastly, we refined the fretboard estimates with plausibility filtering \citep{abesser2012}, in which we rejected and reassigned string decisions that were implausible given the constraints and assumptions of the data. If our systems assigned to a note a string on which the corresponding fretted position is negative, a mistake was made since frets cannot possibly be lower than 0 (the open-string). Similarly, if our system assigned to a note a string on which the corresponding fret is greater than 12, a mistake was made because our guitar recordings feature only frets 0-12. When either of these situations arose, we rejected the string classification decision and selected the next most probable string. If the succeeding string was also implausible, the process was iterated until all six strings were considered.
 
 \subsection{Baseline Bayesian Classifier}
-The hypothesis of our regression method is that exploitation of the linear trajectories of log-inharmonicities is helpful for transcription. To objectively evaluate this we develop a baseline classifier, which we simply call Bayesian classification, which \textit{does not} leverage the inharmonicity trajectories and whose results serve as a benchmark.
+The hypothesis of our regression method was that exploitation of the linear trajectories of log-inharmonicities is helpful for transcription. To objectively evaluate this we developed a baseline classifier, which we simply called Bayesian classification, which \textit{does not} leveraged the inharmonicity trajectories and whose results served as a benchmark.
 
-As before, we first measure the inharmonicities of guitar notes using median-adjustive-trajectories (MAT). Frame aggregation is performed using the same specifications discussed in Section~\ref{sub:inharmonicity-regression}. Next, we estimate the inharmonicity distribution of each fretboard position $f$. For each of the $F=78$ positions (13 notes $\times$ 6 strings), we calculate the median $\tilde{\beta}_f$ and variance $\sigma^2_f$ of its inharmonicities, and use these to parameterize a Gaussian probability density $\mathcal{N}_f(\tilde{\beta}_f,\sigma^2_f)$. We choose the median to lessen the influence of outliers.
+As before, we first measured the inharmonicities of guitar notes using median-adjustive-trajectories (MAT). Frame aggregation was performed using the same specifications discussed in Section~\ref{sub:inharmonicity-regression}. Next, we estimated the inharmonicity distribution of each fretboard position $f$. For each of the $F=78$ positions (13 notes $\times$ 6 strings), we calculated the median $\tilde{\beta}_f$ and variance $\sigma^2_f$ of its inharmonicities, and used these to parameterize a Gaussian probability density $\mathcal{N}_f(\tilde{\beta}_f,\sigma^2_f)$. We chose the median to lessen the influence of outliers.
 
-We then classify unseen notes. We measure the inharmonicity $\beta^{(i)}$ of the $i$th unseen note $\mathbf{x}=[1,m_0^{(i)}]^T$ with fundamental MIDI pitch $m_0^{(i)}$ and simply evaluate the probability $P_f(\beta^{(i)} | f) = \mathcal{N}_f(\beta^{(i)} | \tilde{\beta}_f,\sigma^2_f)$ of it having been generated by the Gaussian distribution $\mathcal{N}_f$. We narrow our search space $f \in \{1,2,3,...,F-1,F\}$ of possible fretboard positions by considering just the positions $f \in \{f_{m,1},f_{m,2},...\}$ that agree with the fundamental frequency of the unseen note. For standard-tuning, this is a maximum of only three positions. To classify a note, we select the candidate fretboard position which maximizes the likelihood of the measured inharmonicity of the note, just as in equation~\eqref{eq:string-argmax}:
+We then classified unseen notes. We measured the inharmonicity $\beta^{(i)}$ of the $i$th unseen note $\mathbf{x}=[1,m_0^{(i)}]^T$ with fundamental MIDI pitch $m_0^{(i)}$ and evaluated the probability $P_f(\beta^{(i)} | f) = \mathcal{N}_f(\beta^{(i)} | \tilde{\beta}_f,\sigma^2_f)$ of it having been generated by the Gaussian distribution $\mathcal{N}_f$. We narrowed our search space $f \in \{1,2,3,...,F-1,F\}$ of possible fretboard positions by considering just the positions $f \in \{f_{m,1},f_{m,2},...\}$ that agree with the fundamental frequency of the unseen note. For standard-tuning, this is a maximum of only three positions. To classify a note, we selected the candidate fretboard position which maximized the likelihood of the measured inharmonicity of the note, just as in equation~\eqref{eq:string-argmax}:
 \begin{equation}
 \hat{f} = \argmax_{f\in\{f_{m,1},f_{m,2}...\}}P(\beta^{(i)} | f).
 \label{eq:string-classification-mle}
 \end{equation}
-
-
-\subsection{Tuning Compensation Feature}
-Though standard tuning is the most common pitch configuration of six-string guitars, there exist numerous other tunings in which performers often play. These tunings can affect the performance of inharmonicity-based transcription methods, since the tensions of alternately-tuned guitar strings differ from those in standard-tuned strings.
-
-One approach to augment inharmonicity-based string classifiers with tuning-invariant performance is to introduce a scaling factor on the expected inharmonicity, or equivalently an additive factor on the expected log-inharmonicity. The fundamental frequency $f_0$ of an ideal vibrating string is related to its tension $T$ according to
-\begin{equation}
-f_0 = \frac{1}{2L}\sqrt{\frac{T}{\mu}}
-\label{eq:freq-tension}
-\end{equation}
-where $L$ is string length and $\mu$ is its density. From this, we can see that
-\begin{equation}
-T \propto f_0^{2}.
-\end{equation}
-Recognizing that the equivalent change in frequency for a change in fundamental pitch of $\Delta m$ semitones is $2^{\frac{\Delta m}{12}}$, we see that the proportional change in tension (with all other factors constant) is
-\begin{equation}
-T \propto 2^{\frac{\Delta m}{6}}f_0^2.
-\end{equation}
-The resulting log-inharmonicity of this new open-string note with pitch $m_{os}' = m_{os}+\Delta m$, with original open-string pitch $m_{os}$, is therefore
-\begin{equation}
-\log_2\beta(m_{os}') = \log_2[ \frac{\pi^3 Q d^4}{64 T l^2}(2^{-\frac{\Delta m}{6}})].
-\end{equation}
-\begin{equation}
-\label{eq:delta-beta}
-\log_2\beta(m_{os}') = \log_2\frac{\pi^3 Q d^4}{64 T l^2} - \frac{\Delta m}{6}.
-\end{equation}
-Substituting~\eqref{eq:delta-beta} into the log-inharmonicity term of $w_0$ from equation~\eqref{eq:linear-traj}, we get the new intercept term $w_0':$
-\begin{equation}
-w_{0}' = \log_2{\beta}(m_{os}') - \frac{m_{os}'}{6}
-\end{equation}
-\begin{equation}
-w_{0}' = (\log_2\frac{\pi^3 Q d^4}{64 T l^2} - \frac{\Delta m}{6}) - \frac{m_{os}+\Delta m}{6}
-\end{equation}
-\begin{equation}
-\label{eq:3.17}
-w_{0}' = \log_2\frac{\pi^3 Q d^4}{64 T l^2} - \frac{m_{os}}{6} - \frac{\Delta m}{3}
-\end{equation}
-\begin{equation}
-\label{eq:3.18}
-w_{0}' = w_0 - \frac{\Delta m}{3}.
-\end{equation}
-The slope coefficient $w_1 = -\frac{m}{6}$ is independent from ${\Delta m}$, so the affected log-inharmonicity trajectory of this alternately-tuned string is therefore
-\begin{equation}
-\label{eq:3.20}
-\beta'(m) = w_0 + w_1m - \frac{\Delta m}{3}.
-\end{equation}
-Equation~\eqref{eq:3.20} states that the effect of an alternate tuning on a string is simply introduction of a bias term $\frac{-\Delta m}{3}$ to the log-inharmonicity, where $\Delta m$ is the semitone deviation from standard tuning. Compensating our trajectories to arbitrarily-tuned guitars is thus straightforward, provided we know the alternate tuning in which the unseen notes are being performed. 
-
-\begin{figure}[!htbp] 
-\label{fig:tuning-eg}
-\centering
-\includegraphics[scale=0.25]{tuning-eg}
-%\includesvg[scale=0.25]{tuning-eg}
-\caption{Effect of alternate tuning on log-inharmonicity trajectories of an electric guitar. The circles are log-inharmonicity estimates of Frets 0-12 on String 6 of RWC Electric Guitar EG131 in standard tuning, and the dashed line is their bisquare-weighted regression. The asterisks are log-inharmonicity estimates for the same frets, string, and guitar recorded two semitones down. The dotted line passing through them is the \textit{predicted} regression obtained by applying equation~\eqref{eq:3.20} to the dashed line.}
-\end{figure}
 
 \section{Results}  
 \subsection{RWC Transcription}
@@ -276,80 +221,12 @@ Figure~\ref{fig:novel-methods-sig-comp} shows and compares the error probabiliti
 
 Figure~\ref{fig:sig-comp-PCT} compares error rates and significance between our methods and the existing PCT method. We used paired-sample $t$-tests ($\alpha = 0.05$) for significance testing. Because we did not have access to the trial-by-trial transcription results of PCT, we approximated the standard deviation $\sigma_d$ of the distribution of the differences by the square root of the average of the variances of the methods $\sigma_d = \sqrt{(\sigma^2_1+\sigma^2_2)/2}$ according to the Bernoulli approximation, in which $\sigma_x^2 = p_x(1-p_x)$ and the success parameter $p_x$ is simply the difference of $1$ and the reported error probability of method $x$, i.e. $p_x = 1-\mu_x$. We calculated the $t$-score of each comparison according to $t = \mu_d/(\sigma_d/\sqrt{n})$, with $n= 78$ notes $\times 12$ recordings $=936$ classified instances over which the error probabilities were averaged ($n=468$ for the fewer recordings of the electric guitars). 
 
-\begin{figure}[!htbp]
+\begin{figure}[!h]
 \centering
 \includegraphics[scale=0.25]{sig-comp-PCT}
 \caption{For each guitar in every trial, if either of our methods performed significantly differently than PCT we mark it with either an `O' or an `X'. The former denotes significantly lower error probability while the latter denotes significantly higher error probability. Note that electric guitar trials and ``Guitar-independent" trial contexts are omitted since comparisons with PCT in those cases are not available.}
 \label{fig:sig-comp-PCT}
 \end{figure}
-
-
-\subsection{Tuning Compensation}
-We evaluated our tuning compensation method on personal recordings of an electric and acoustic guitar. The string gauge of the acoustic guitar was 0.12 inches, while that of the electric guitar was unknown. We captured various tunings: standard, ``DADGAD" (in which the open pitches of String 6 through String 1 are given by the respective letters in name), ``WSU" (whole-step up), and ``WSD" (whole-step down). The electric guitar, which was recorded direct-input, was performed with a thick plectrum at center pickup orientation (both bridge and neck pickups engaged) and at similar moderate dynamic levels throughout. We recorded the acoustic guitar in an isolated chamber with a large diaphragm condenser microphone placed 12 inches away from the twelfth fret, and we also played it with a thick plectrum and at constant dynamic levels.
-
-We learned inharmonicity regressions from the recordings of the standard-tuned RWC electric and acoustic guitar recordings, and predicted string classes on our respective recorded guitars. We evaluated string-wise F1-score performance both with and without our tuning compensation factor. In Tables~\ref{tab:resultsTune} and~\ref{tab:results-ag-tune}, compensated results are denoted by the ``comp." column, and original results without compensation are denoted by the ``orig." column.  For reference we also report transcription performance in standard tuning under the "Standard" column. We highlight in gray the results which were determined by a McNemar test to be statistically significant ($\alpha = 0.05$): highlighted `orig.' cells indicate that the performance degradation due to the corresponding tuning is significantly different from the standard-tuned performance, while highlighted `comp.' cells indicate that the performance gain achieved by our compensation system is significant with respect to its uncompensated counterpart.
-
-\begin{table*}[!htbp]
-\begin{center}
-\begin{tabular}{||c||c||c|c||c|c||c|c||}
-\hline
-\multicolumn{8}{|c|}{\bf{Alternate-tuning Transcription F1-scores (Electric)}} \\
-\hline
-& Standard & \multicolumn{2}{|c|}{``DADGAD"} & \multicolumn{2}{|c|}{``WSU"} & \multicolumn{2}{|c|}{``WSD"} \\
-\hline
-String No. & orig. & orig. & comp. & orig. & comp. & orig. & comp. \\
-\hline
-1 & 0.96 & 0.96 & 0.96 & 0.87 & 0.96 & 0.96 & 0.96 \\
-\hline
-2 & 0.96 & 0.92 & 0.92 & 0.70 & 0.96 & 0.96 & 0.96\\
-\hline
-3 & 0.50 & 0.48 & 0.43 & 0.65 & 0.50 & 0.50 & 0.50\\
-\hline
-4 & 0.76 & 0.76 & 0.74 & 0.38 & 0.76 & 0.76 & 0.76 \\
-\hline
-5 & 1.00 & 1.00 & 0.87 & 0.56 & 1.00 & 1.00 & 1.00 \\
-\hline
-6 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00\\ 
-\hline
-\hline
-Overall: & 0.86 & 0.85 & 0.82 &  \cellcolor[gray]{0.8}0.69 & \cellcolor[gray]{0.8}0.86 & 0.86 & 0.86\\
-\hline
-\end{tabular}
-\caption{String-wise F1-scores for our Fender Telecaster at various tunings. Regressions trained on recordings of all three RWC electric guitars. WSU: whole-step up (from standard); WSD: whole-step down (from standard); orig.: no tuning compensation used in this trial; comp.: tuning compensation used in this trial. The ``Overall" row displays average F1-score of each column. Statistically significant ($\alpha=0.05$) results highlighted in gray.} 
-\label{tab:resultsTune}
-\end{center}
-\end{table*}
-
-\begin{table*}[!htbp]
-\begin{center}
-\begin{tabular}{||c||c||c|c||c|c||c|c||}
-\hline
-\multicolumn{8}{|c|}{\bf{Alternate-tuning Transcription F1-scores (Acoustic)}} \\
-\hline
-& Standard & \multicolumn{2}{|c|}{``DADGAD"} & \multicolumn{2}{|c|}{``WSU"} & \multicolumn{2}{|c|}{``WSD"} \\
-\hline
-String No. & orig. & orig. & comp. & orig. & comp. & orig. & comp. \\
-\hline
-1 & 0.96 & 0.87 & 0.92 & 0.96 & 0.96 & 0.92 & 0.96 \\
-\hline
-2 & 0.82 & 0.70 & 0.63 & 0.44 & 0.82 & 0.67 & 0.92\\
-\hline
-3 & 0.96 & 0.93 & 1.00 & 0.74 & 0.96 & 0.00 & 0.96\\
-\hline
-4 & 0.87 & 0.79 & 0.79 & 0.90 & 0.87 & 0.44 & 0.93 \\
-\hline
-5 & 1.00 & 1.00 & 1.00 & 0.82 & 1.00 & 0.81 & 1.00 \\
-\hline
-6 & 1.00 & 1.00 & 1.00 & 0.96 & 1.00 & 1.00 & 1.00\\ 
-\hline
-\hline
-Overall: & 0.93 & 0.88 & 0.89 & \cellcolor[gray]{0.8}0.80 & \cellcolor[gray]{0.8}0.93 & \cellcolor[gray]{0.8}0.64 & \cellcolor[gray]{0.8}0.96\\
-\hline
-\end{tabular}
-\caption{String-wise F1-scores for our Takamine G-series at various tunings. Regressions trained on all recordings of all three RWC acoustic guitars. WSU: whole-step up (from standard); WSD: whole-step down (from standard); orig.: no tuning compensation used in this trial; comp.: tuning compensation used in this trial. The ``Overall" row displays average F1-score of each column. Statistically significant ($\alpha=0.05$) results highlighted in gray.} 
-\label{tab:results-ag-tune}
-\end{center}
-\end{table*}
 
 
 \section{Discussion} 
@@ -360,13 +237,10 @@ Figure~\ref{fig:sig-comp-PCT} shows that PCT performed better than or just as we
 
 We investigated the modest performance of our system by studying factors that could have compromised the inharmonicity estimation. One such pernicious factor was guitar string geometry. We recorded identical note plucks on personal guitars exhibiting an array of combinations of string age, intonation length, gauge size, and winding, and we observed that variations in the latter two affected our log-inharmonicity measurements by orders of magnitude between one-tenth and one. The degree of this variability is commensurate with that of our log-inharmonicity estimates of adjacent strings. The RWC database does not annotate string geometry parameters for any of its guitars, so it is possible this dimension interfered with the quality of reported transcription results among systems using this database. Future work should take care to control for this variable when possible.
 
-\subsection{Tuning Compensation}
-The alternate-tuning experiments validated our tuning compensation feature, as we see in Tables~\ref{tab:resultsTune} and~\ref{tab:results-ag-tune} that the effect of appropriately scaling the inharmonicity regressions for tunings which significantly degraded standard-tuned performance is to restore transcription accuracy towards that obtained using standard tuning. Interestingly, the effect of various tunings (``DADGAD" in both electric and acoustic, ``WSD" in the electric) on our guitars' transcriptions is statistically insignificant, suggesting that we may have overestimated how problematic some alternate tunings are for inharmonicity-based systems. Surprisingly, the ``Standard" and ``WSD" accuracies for our electric guitar are identical both with and without tuning compensation.
-
 \section{Summary} 
-Tablature is a popular music notation for guitarists because it uniquely specifies fretboard positions for musical passages. Its manual annotation process, however, is tedious. Automatic transcription systems offer a solution to this difficulty. Inharmonicity, which affects the degree of upward skew of the partials of a note, is a key feature used in some successful systems \citep{barbanchoi2012}. We proposed to capitalize on the predictable log-inharmonicity trajectory of a string by characterizing it as a linear regression against its pitch, and we developed a baseline Bayesian classifier to contextualize the performance of this regression approach. We also derived an inharmonicity adjustment factor that could be used to compensate for guitars recorded in alternate tunings.
+Tablature is a popular music notation for guitarists because it uniquely specifies fretboard positions for musical passages. Its manual annotation process, however, is tedious. Automatic transcription systems offer a solution to this difficulty. Inharmonicity, which affects the degree of upward skew of the partials of a note, is a key feature used in some successful systems \citep{barbanchoi2012}. We proposed to capitalize on the predictable log-inharmonicity trajectory of a string by characterizing it as a linear regression against its pitch, and we developed a baseline Bayesian classifier to contextualize the performance of this regression approach. 
 
-Comparisons between our baseline and regression methods suggested that leveraging inharmonicity regressions is a worthwhile pursuit. Contrasting both of our methods against the existing PCT method, however, showed no significant improvement. We learned that, regardless of the degree to which it compromised the performance of this or other transcription systems, guitar string geometry is an important factor to consider when developing inharmonicity-based methods. Lastly, we validated our inharmonicity compensation feature, reporting accuracy increases on personal recordings of alternately-tuned electric and acoustic guitars.
+Comparisons between our baseline and regression methods suggested that leveraging inharmonicity regressions is a worthwhile pursuit. Contrasting both of our methods against the existing PCT method, however, showed no significant improvement. We learned that, regardless of the degree to which it compromised the performance of this or other transcription systems, guitar string geometry is an important factor to consider when developing inharmonicity-based methods.
 
 \bibliographystyle{jaes}
 
